@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<HTML>
+
+<HEAD>
+    <META CHARSET="utf-8">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script SRC="d3/d3.v3.js"></script>
+    <script type="text/javascript" src='assets/misc.js'></script>
+    <SCRIPT>
+
+        var stat = 'WAR'
+        var d  = null
+        function draw(data) {
+
+            "use strict";
+            var width = 800, height = 200; 
+
+            console.log(data)
+            d = data
+            
+            var svg = d3.select("#chart")
+                .append("svg")
+                .attr("class", "barchart")
+                
+            var bars = svg.selectAll("rect")
+                .data(data.seasons.sort(dynamicSort(stat)).slice(0,25))
+                .enter()
+                .append("rect")
+                .attr("class","bar")
+                
+            
+            var mx = Math.max.apply(Math,data.seasons.map(function(o){return o[stat];}))
+            var mn = Math.min.apply(Math,data.seasons.map(function(o){return o[stat];}))
+
+            console.log(mx)
+            console.log(mn)
+
+            var y = d3.scale.linear()
+                .domain([mn,mx])
+                .range([0,height])
+
+
+
+            bars.attr('x',function(d,i){
+                    return i*25;
+                })
+                .attr('y',function(d) { 
+                    return height - y(d.value) - .5; 
+                })
+                .attr('width',25)
+                .attr('height',function(d){
+                    return y(d[stat]);
+                })
+
+            svg.selectAll("#bar")
+                .on("mouseover", function(d){
+                    tooltip.html(d)  
+                    .style("left", d3.select(this).attr("cx") + "px")
+                    .style("top", d3.select(this).attr("cy") + "px");
+                });
+
+        }
+    </SCRIPT>
+    <TITLE>Baseball Data</TITLE>
+</HEAD>
+<BODY>
+    <div id='title'>d3 Baseball Data</div>
+    <div id='chart'></div>
+    <div id='key'></div>
+    <SCRIPT>
+        d3.json("data/baseball.json",draw);
+    </SCRIPT>
+</BODY>
+
+</HTML>
