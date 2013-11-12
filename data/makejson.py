@@ -3,8 +3,8 @@ import os
 import json
 
 
-f = open('baseball2.csv','r')
-fj = open('baseball2.json','w')
+f = open('baseball3.csv','r')
+fj = open('baseball3.json','w')
 
 header = f.readline()
 columns = header.split(',')

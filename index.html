@@ -14,7 +14,7 @@
         var datind=0;
         var ind_leaders=1, car_leaders=0, ind=0;
         var nbars=30;
-        var type='play'
+        var type='seas'
         var player = 'barrybonds'
         var pstats = ['WAR','H','HR','R','RBI','SB']
         var stats=['WAR','H','HR','R','RBI','SB','BB%','K%','ISO',
@@ -83,14 +83,14 @@
 <BODY>
     <div class='tabnav'>
         <ul class='tabnav-tabs'>
-            <li id='sea' class='tab'>Seasons</li>
+            <li id='sea' class='selected'>Seasons</li>
             <li id='car' class='tab'>Career</li>
-            <li id='play' class='selected'>Player</li>
+            <li id='play' class='tab'>Player</li>
         </ul>
     </div>
     <div id='chart'></div>
     <SCRIPT>
-        d3.json("data/baseball2.json",draw);
+        d3.json("data/baseball3.json",draw);
     </SCRIPT>
 </BODY>
 

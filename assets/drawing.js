@@ -290,12 +290,8 @@ function update_bars(data){
 
     rect.transition()
         .duration(750)
-        .attr('x',function(d,i){
-            return x(i+1+datind);
-        })
-        .attr('y',function(d) { 
-            return y(d[stat]); 
-        })
+        .attr('x',function(d,i){return x(i+1+datind);})
+        .attr('y',function(d){return y(d[stat]);})
         .attr('width',barwid)
         .attr('height',function(d){
             return height + ymargin- y(d[stat]);
