@@ -11,7 +11,7 @@ div.barchart{
 }
 
 rect.bar {
-    fill:green;
+    fill:none;
     stroke:white;
     height:3em;
     width:3em;
@@ -147,6 +147,84 @@ text.infotext{
   color: #000;
 }
 
+path{
+  fill:none;
+}
 .nav{
     cursor: pointer;
+}
+
+.H{  
+  fill:#FFFFFF;
+  stroke:#FFFFFF;
+}
+
+.HR{
+  fill:#FF6600;
+  stroke:#FF6600;
+}
+
+.WAR{
+  fill:#FF3399;
+  stroke:#FF3399;
+}
+
+.RBI{
+  fill:#0000FF;
+  stroke:#0000FF;
+}
+
+.SB{
+  fill:#33FF00;
+  stroke:#33FF00;
+}
+
+.ISO{
+  fill:#CCCCFF;
+  stroke:#CCCCFF;
+}
+
+.wOBA{
+  fill:#FF0000;
+  stroke:#FF0000;
+}
+
+.wRC{
+  fill:#66FFCC;
+  stroke:#66FFCC;
+}
+
+.R{
+  fill:#FF9999;
+  stroke:#FF9999;
+}
+
+.BB{
+  fill:#996633;
+  stroke:#996633;
+}
+
+.K{
+  fill:#336666;
+  stroke:#336666;
+}
+
+.AVG{
+  fill:#660099;
+  stroke:#660099;
+}
+
+.OBP{
+  fill:#CCFFCC;
+  stroke:#CCFFCC;
+}
+
+.SLG{
+  fill:#FFFF66;
+  stroke:#FFFF66;
+}
+
+.wRC{
+  fill:#66FFCC;
+  stroke:#66FFCC;
 }

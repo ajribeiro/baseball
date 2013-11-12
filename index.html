@@ -14,36 +14,52 @@
         var datind=0;
         var ind_leaders=1, car_leaders=0, ind=0;
         var nbars=30;
-        var type='seas'
-        var stats=['WAR','HR','R','RBI','SB','BB%','K%','ISO',
+        var type='play'
+        var player = 'barrybonds'
+        var pstats = ['WAR','H','HR','R','RBI','SB']
+        var stats=['WAR','H','HR','R','RBI','SB','BB%','K%','ISO',
             'AVG','OBP','SLG','wOBA','wRC+']
         var defs = {'WAR':'Wins above replacement','HR':'Homeruns','R':'Runs','RBI':'Runs batted in','SB':'Stolen bases','BB%':'Walk Percentage','K%':'Strikeout percentage','ISO':'Isolated power',
-            'AVG':'Batting average','OBP':'On base percentage','SLG':'Slugging percentage','wOBA':'Weighted on base average','wRC+':'Weighted runs created plus'}
-
+            'AVG':'Batting average','OBP':'On base percentage','SLG':'Slugging percentage','wOBA':'Weighted on base average','wRC+':'Weighted runs created plus','H':'Hits'}
+        var pcols = {'H':'#FFFFFF','HR':'#FF6600',
+                        'WAR':'#FF3399','RBI':'#0000FF','SB':'#33FF00','ISO':'#CCCCFF',
+                        'wOBA':'#FF0000','wRC':'#66FFCC','R':'#FF9999','BB':'#996633',
+                        'K':'#336666','AVG':'#660099','OBP':'#CCFFCC','SLG':'#FFFF66',
+                        'wRC':'#66FFCC'}
         function draw(data) {
 
             "use strict";
 
             d3.select('#sea')
                 .on('click',function(){
+                    var t = type;
                     d3.select('#sea').attr('class','selected')
                     d3.select('#car').attr('class','tab')
                     d3.select('#play').attr('class','tab')
                     type='seas'
                     datind=0
-                    update_bars(data)
-                    draw_y_axis()
+                    if(t == 'play'){
+                        draw_leaders(data)
+                    } else{
+                        update_bars(data)
+                        draw_y_axis()
+                    }
                 })
 
             d3.select('#car')
                 .on('click',function(){
+                    var t = type;
                     d3.select('#sea').attr('class','tab')
                     d3.select('#car').attr('class','selected')
                     d3.select('#play').attr('class','tab')
                     type='car'
                     datind=0
-                    update_bars(data)
-                    draw_y_axis()
+                    if(t == 'play'){
+                        draw_leaders(data)
+                    } else{
+                        update_bars(data)
+                        draw_y_axis()
+                    }
                 })  
 
             d3.select('#play')
@@ -56,7 +72,10 @@
                     draw_player(data)
                 })  
 
-            draw_leaders(data)
+            if(type == 'play')
+                draw_player(data)
+            else
+                draw_leaders(data)
         }
     </SCRIPT>
     <TITLE>Baseball Data</TITLE>
@@ -64,14 +83,14 @@
 <BODY>
     <div class='tabnav'>
         <ul class='tabnav-tabs'>
-            <li id='sea' class='selected'>Seasons</li>
+            <li id='sea' class='tab'>Seasons</li>
             <li id='car' class='tab'>Career</li>
-            <li id='play' class='tab'>Player</li>
+            <li id='play' class='selected'>Player</li>
         </ul>
     </div>
     <div id='chart'></div>
     <SCRIPT>
-        d3.json("data/baseball.json",draw);
+        d3.json("data/baseball2.json",draw);
     </SCRIPT>
 </BODY>
 

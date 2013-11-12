@@ -15,6 +15,14 @@ function dynamicSort(pa,pb,pc) {
     }
 };
 
+function dynamicSort2(pa) {
+    var sortOrder = -1;
+    return function (a,b) {
+        var result = (a[pa] < b[pa]) ? -1 : (a[pa] > b[pa]) ? 1 : 0;
+        return result * sortOrder;
+
+    }
+};
 function hashCode(str) { // java String#hashCode
     var hash = 0;
     for (var i = 0; i < str.length; i++) {

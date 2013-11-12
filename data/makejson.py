@@ -3,11 +3,12 @@ import os
 import json
 
 
-f = open('baseball.csv','r')
-fj = open('baseball.json','w')
+f = open('baseball2.csv','r')
+fj = open('baseball2.json','w')
 
 header = f.readline()
 columns = header.split(',')
+for i in range(len(columns)): columns[i] = columns[i].replace("\"",'')
 #set up all of the indices
 
 
@@ -15,6 +16,8 @@ columns = header.split(',')
 allplayers = []
 for line in f:
     c = line.split(',')
+    for i in range(len(c)): c[i] = c[i].replace("\"",'')
+
     idnum = int(c[-1])
     p = {'id':idnum,'name':c[1],'year':int(c[0])}
     
@@ -24,19 +27,22 @@ for line in f:
         else:
             p[columns[i]] = None
 
-    p['hsh'] = c[1].replace(' ','').replace(".",'').replace("'",'')+str(int(c[0]))
+    p['hsh'] = c[1].replace(' ','').replace(".",'').replace("'",'')+str(int(c[0]))+str(idnum)
+    p['lname'] = c[1].replace(' ','').replace(".",'').replace("'",'').lower()
     allplayers.append(p)
 
 f.close()
 
 
-f = open('career.csv','r')
+f = open('career2.csv','r')
 header = f.readline()
 columns = header.split(',')
-
+for i in range(len(columns)): columns[i] = columns[i].replace("\"",'')
 allcars = []
 for line in f:
     c = line.split(',')
+    for i in range(len(c)): c[i] = c[i].replace("\"",'')
+
     idnum = int(c[-1])
     p = {'id':idnum,'name':c[0]}
     
