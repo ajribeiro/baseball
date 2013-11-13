@@ -13,7 +13,7 @@ def add_node(g,p1,p2,w):
     if p1 not in g: g[p1] = {}
     g[p1][p2] = w
     if p2 not in g: g[p2] = {}
-    g[p2][p1] = {}
+    g[p2][p1] = w
 
         
 def calc_avgs(p1,averages,mx):
@@ -57,17 +57,34 @@ def calc_sim(averages,p,p2,stats,dists,mx,ids):
         
 
 def calc_sim_car(averages,p,p2,stats,dists,mx,ids):
+    if p in dists and p2 in dists[p]: return
+    if p == p2: return
+
     mx = averages[p]['maxage']
     mx2 = averages[p2]['maxage']
-    sim = 0;
+    # sim = 0;
+    dist = 0.
     for i in range(len(stats)):
+        if p == 1109 and p2 == 3473:
+            print averages[p][mx][i],averages[p2][mx2][i]
         if not math.isnan(averages[p][mx][i]) and not math.isnan(averages[p2][mx2][i]) \
             and isinstance(averages[p][mx][i],float) and isinstance(averages[p2][mx2][i],float):
             # print stats[i],averages[p][mx][i], averages[p2][mx][i],maxs[i],mins[i],maxs[i]-mins[i], abs(averages[p][mx][i] - averages[p2][mx][i])/abs(maxs[i]-mins[i])
-            sim += (1.- abs(averages[p][mx][i] - averages[p2][mx2][i])/abs(maxs[i]-mins[i]))
+            # sim += (1.- abs(averages[p][mx][i] - averages[p2][mx2][i])/abs(maxs[i]-mins[i]))
+            dist += (abs(averages[p][mx][i] - averages[p2][mx2][i])/abs(maxs[i]-mins[i]))**2
 
-        add_node(dists,ids[p],ids[p2],sim)
+    dist = np.sqrt(dist)
+    add_node(dists,ids[p],ids[p2],dist)
+    if p == 1109 and p2 == 3473: 
+        print dist
+        print 'p' 
+        print dists['Barry Bonds']['Anthony Rizzo']
         
+def test_func(i):
+    pass
+    pass
+    pass
+    return i**2
 
 f = open('baseball3.json','r')
 
@@ -111,9 +128,10 @@ for p in players:
                 if st < mins[i]: mins[i] = st
 
 averages = {}
+import datetime as dt
+t1 = dt.datetime.now()
 map(lambda x: calc_avgs(x,averages, 1e6), players)
-
-# map(lambda x: outer_loop(x,averages, players), averages)
+print dt.datetime.now()-t1
 
 for p in averages:
     k = averages[p].keys()
