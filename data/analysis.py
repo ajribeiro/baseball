@@ -1,8 +1,8 @@
-
 import json
 import matplotlib.pyplot as plt
 import numpy as np
 import math 
+import pymongo 
 
 dists = {}
 ids = {}
@@ -14,6 +14,14 @@ def add_node(g,p1,p2,w):
     g[p1][p2] = w
     if p2 not in g: g[p2] = {}
     g[p2][p1] = w
+
+def add_node2(g,p1,p2,w,age):
+    if p1 not in g: g[p1] = {}
+    g[p1][p2] = {}
+    g[p1][p2][age] = w
+    if p2 not in g: g[p2] = {}
+    g[p2][p1] = {}
+    g[p2][p1][age] = w
 
         
 def calc_avgs(p1,averages,mx):
@@ -32,28 +40,15 @@ def calc_avgs(p1,averages,mx):
 
         averages[p1][a] = avgs
 
-    # for a in alls:
-    #     avgs.append(np.mean(a))
-
-# def outer_loop(p1, averages, players):
-#     print ids[p1]
-#     maxage = averages[p1]['maxage']
-#     averages2 = {}
-#     map(lambda x: calc_avgs(x,averages2, maxage), players)
-#     for i in range(len(stats)):
-#         if averages[i] and avgs2[i]:
-#             sim += (1.- abs(averages[i] - avgs2[i])/abs(maxs[i]-mins[i]))
-
-
 def calc_sim(averages,p,p2,stats,dists,mx,ids):
-    if mx in averages[p2]:
-        sim = 0;
+    for a in range(0,mx):
+        if a not in averages[p] or a not in averages[p2]: continue
+        dist = 0;
         for i in range(len(stats)):
-            if not math.isnan(averages[p][mx][i]) and not math.isnan(averages[p2][mx][i]) and isinstance(averages[p][mx][i],float) and isinstance(averages[p2][mx][i],float):
-                # print stats[i],averages[p][mx][i], averages[p2][mx][i],maxs[i],mins[i],maxs[i]-mins[i], abs(averages[p][mx][i] - averages[p2][mx][i])/abs(maxs[i]-mins[i])
-                sim += (1.- abs(averages[p][mx][i] - averages[p2][mx][i])/abs(maxs[i]-mins[i]))
+            if not math.isnan(averages[p][a][i]) and not math.isnan(averages[p2][a][i]) and isinstance(averages[p][a][i],float) and isinstance(averages[p2][a][i],float):
+                dist += (abs(averages[p][a][i] - averages[p2][a][i])/abs(maxs[i]-mins[i]))**2
 
-        add_node(dists,ids[p],ids[p2],sim)
+        add_node2(dists,ids[p],ids[p2],sim,a)
         
 
 def calc_sim_car(averages,p,p2,stats,dists,mx,ids):
@@ -62,29 +57,15 @@ def calc_sim_car(averages,p,p2,stats,dists,mx,ids):
 
     mx = averages[p]['maxage']
     mx2 = averages[p2]['maxage']
-    # sim = 0;
     dist = 0.
     for i in range(len(stats)):
-        if p == 1109 and p2 == 3473:
-            print averages[p][mx][i],averages[p2][mx2][i]
         if not math.isnan(averages[p][mx][i]) and not math.isnan(averages[p2][mx2][i]) \
             and isinstance(averages[p][mx][i],float) and isinstance(averages[p2][mx2][i],float):
-            # print stats[i],averages[p][mx][i], averages[p2][mx][i],maxs[i],mins[i],maxs[i]-mins[i], abs(averages[p][mx][i] - averages[p2][mx][i])/abs(maxs[i]-mins[i])
-            # sim += (1.- abs(averages[p][mx][i] - averages[p2][mx2][i])/abs(maxs[i]-mins[i]))
             dist += (abs(averages[p][mx][i] - averages[p2][mx2][i])/abs(maxs[i]-mins[i]))**2
 
     dist = np.sqrt(dist)
     add_node(dists,ids[p],ids[p2],dist)
-    if p == 1109 and p2 == 3473: 
-        print dist
-        print 'p' 
-        print dists['Barry Bonds']['Anthony Rizzo']
-        
-def test_func(i):
-    pass
-    pass
-    pass
-    return i**2
+
 
 f = open('baseball3.json','r')
 
@@ -94,85 +75,144 @@ data = json.loads(data)
 
 seasons = data['seasons']
 
-players = {}
-stats = ['HR%','R%','SB%','BB%','K%','ISO','BABIP','AVG','SLG','BsR']
+from pymongo import MongoClient
+client = MongoClient('sd-work2.ece.vt.edu', 27017)
+db = client.baseball
+collection = db.player_stats
+collection.ensure_index('name')
+collection.ensure_index('age')
+collection.ensure_index('idnum')
 
-for s in seasons:
-    name = s['name'].encode('utf-8')
-    idnum = s['id']
-    if idnum not in players:
-        players[idnum] = {}
-        ids[idnum] = name
+ratstats = ['HR%','R%','SB%','BB%','K%','ISO','BABIP','AVG','SLG','BsR']
+allstats = ratstats + ['WAR','H','RBI','SB','OBP','wOBA','wRC+','HR','PA','AB','G']
 
-    age = int(s['Age'])
-    players[idnum][age] = {}
-    for st in stats:
-        if st == 'HR%':
-            players[idnum][age][st] = s['HR']/float(s['AB'])
-        elif st == 'R%':
-            players[idnum][age][st] = s['R']/float(s['AB'])
-        elif st == 'SB%':
-            players[idnum][age][st] = s['SB']/float(s['PA'])
-        else:
-            players[idnum][age][st] = s[st]
+# players = []
+# for s in seasons:
+#     name = s['name'].encode('utf-8')
+#     idnum = s['id']
+#     # if idnum not in players:
+#     #     # players[idnum] = {}
+#     #     ids[idnum] = name
 
-maxs = [-1e6 for i in range(len(stats))]
-mins = [1e6 for i in range(len(stats))]
-for p in players:
-    for a in players[p]:
-        for i in range(len(stats)):
-            s = stats[i]
-            st = players[p][a][s]
-            if st:
-                if st > maxs[i]: maxs[i] = st
-                if st < mins[i]: mins[i] = st
+#     age = int(s['Age'])
 
-averages = {}
-import datetime as dt
-t1 = dt.datetime.now()
-map(lambda x: calc_avgs(x,averages, 1e6), players)
-print dt.datetime.now()-t1
+#     p = {}
+#     p['age'] = age
+#     p['name'] = name
+#     p['idnum'] = idnum
+#     for st in allstats:
+#         if st == 'HR%':
+#             p[st] = s['HR']/float(s['AB'])
+#         elif st == 'R%':
+#             p[st] = s['R']/float(s['AB'])
+#         elif st == 'SB%':
+#             p[st] = s['SB']/float(s['PA'])
+#         else:
+#             p[st] = s[st]
 
-for p in averages:
-    k = averages[p].keys()
-    k.remove('maxage')
-    mx = max(k)
-    map(lambda p2: calc_sim_car(averages,p,p2,stats,dists,mx,ids), averages)
+#     players.append(p)
+
+# collection.insert(players)
+
+maxs = [-1e6 for i in range(len(ratstats))]
+mins = [1e6 for i in range(len(ratstats))]
+qry = collection.find()
+allp = []
+for p in qry:
+    for i in range(len(ratstats)):
+        s = ratstats[i]
+        st = p[s]
+        if st:
+            if st > maxs[i]: maxs[i] = st
+            if st < mins[i]: mins[i] = st
+    allp.append(p['name'])
+
+# averages = []
+# for j in range(len(allp)):
+#     p = allp[j]
+#     print j
+#     for age in range(15,60):
+#         q = collection.find({'name':p,'age':{'$lte':age}})
+#         if q.count() < 1: continue
+#         qry = []
+#         for i in q: qry.append(i)
+#         avg = {'name':p,'age':age}
+#         for i in range(len(ratstats)):
+#             s = ratstats[i]
+#             weights = []
+#             alls = []
+#             n = 0
+#             for yr in qry:
+#                 avg['idnum'] = yr['idnum']
+#                 if yr[s]:
+#                     alls.append(yr[s])
+#                     weights.append(yr['PA'])
+
+#             if alls:
+#                 avg[ratstats[i]] = np.average(alls,weights=weights)
+
+#         averages.append(avg)
+
+avgcoll = db.player_averages
+avgcoll.ensure_index('name')
+avgcoll.ensure_index('age')
+avgcoll.ensure_index('idnum')
+# avgcoll.insert(averages)
 
 
-# for p1 in players:
-#     print p1
-#     maxage = max(players[p1].keys())
-#     alls = [[] for i in range(len(stats))]
-#     for a in players[p1]:
-#         alls = [players[p1][a][s] for s in stats if players[p1][a][s]]
-#         # for i in range(len(stats)):
-#         #     s = stats[i]
-#         #     if players[p1][a][s]:
-#         #         alls[i].append(players[p1][a][s])
-#     avgs = [np.mean(a) for a in alls]
-#     # for a in alls:
-#     #     avgs.append(np.mean(a))
+net = {}
+distcoll = db.player_dists
+distcoll.ensure_index('player1')
+distcoll.ensure_index('player2')
+distcoll.ensure_index('age')
 
-#     # map(lambda x: calc_sim(players,p1,x,maxage,stats),players)
-#     for p2 in players:
-#         if p1 == p2 or (p1 in dists and p2 in dists[p1]): continue
-#         alls = [[] for i in range(len(stats))]
-#         for a in players[p2]:
-#             if a > maxage: continue
-#             for i in range(len(stats)):
-#                 s = stats[i]
-#                 if players[p2][a][s]:
-#                     alls[i].append(players[p2][a][s])
-#         avgs2 = []
-#         for a in alls:
-#             avgs2.append(np.mean(a))
-#         sim = 0.
-#         for i in range(len(stats)):
-#             if avgs[i] and avgs2[i]:
-#                 sim += (1.- abs(avgs[i] - avgs2[i])/abs(maxs[i]-mins[i]))
+dists = []
+qry = avgcoll.find()
+players = [y for y in qry]
+for j in range(len(allp)):
+    p = allp[j]
+    print j
+    qry = [y for y in players if y['name'] == p]
+    # qry = avgcoll.find({'name':p})
+    # qry = [y for y in qry]
+    maxage = max([y['age'] for y in qry])
+    qry = [y for y in qry if y['age'] == maxage]
+    ls = []
+    for yr in qry:
+        qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
+        # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
+        pp = []
+        for yr2 in qry2:
+            if p in net and yr2['name'] in net[p]: continue
+            dist = 0;
+            for i in range(len(ratstats)):
+                s = ratstats[i]
+                if s not in yr or s not in yr2: continue
+                if not math.isnan(yr[s]) and not math.isnan(yr2[s]) and \
+                        isinstance(yr[s],float) and isinstance(yr2[s],float):
+                    dist += (abs(yr[s] - yr2[s])/abs(maxs[i]-mins[i]))**2
+
+            dist = np.sqrt(dist)
+            pp.append(yr2['name'])
+            ls.append({'player1':p,'player2':yr2['name'],'age':yr['age'],'dist':dist})
+
+        for p2 in pp:
+            add_node(net,p,p2,dist)
+    if ls: distcoll.insert(ls)
 
 
 
+
+# averages = {}
+# import datetime as dt
+# t1 = dt.datetime.now()
+# map(lambda x: calc_avgs(x,averages, 1e6), players)
+# print dt.datetime.now()-t1
+
+# for p in averages:
+#     k = averages[p].keys()
+#     k.remove('maxage')
+#     mx = max(k)
+#     map(lambda p2: calc_sim_car(averages,p,p2,stats,dists,mx,ids), averages)
 
 
