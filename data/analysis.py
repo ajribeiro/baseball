@@ -167,7 +167,6 @@ avgcoll.ensure_index('idnum')
 # net = {}
 # distcoll = db.player_dists
 # distcoll.ensure_index('player1')
-# distcoll.ensure_index('player2')
 # distcoll.ensure_index('age')
 
 # dists = []
@@ -189,7 +188,7 @@ avgcoll.ensure_index('idnum')
 #         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
 #         pp = []
 #         for yr2 in qry2:
-#             if p in net and yr2['name'] in net[p]: continue
+#             # if p in net and yr2['name'] in net[p]: continue
 #             dist = 0;
 #             for i in range(len(ratstats)):
 #                 s = ratstats[i]
@@ -199,11 +198,9 @@ avgcoll.ensure_index('idnum')
 #                     dist += (abs(yr[s] - yr2[s])/abs(maxs[i]-mins[i]))**2
 
 #             dist = np.sqrt(dist)
-#             pp.append(yr2['name'])
+#             # pp.append(yr2['name'])
 #             ls.append({'player1':p,'player2':yr2['name'],'age':yr['age'],'dist':dist})
 
-#         for p2 in pp:
-#             add_node(net,p,p2,dist)
 
 #     if ls: distcoll.insert(ls)
 
@@ -223,19 +220,21 @@ for j in range(len(allp)):
     p = allp[j]
     print j
     qry = [y for y in players if y['name'] == p]
-    maxage = max([y['age'] for y in qry]) 
+    maxage = max([y['age'] for y in qry])
     qry = [y for y in qry if y['age'] == maxage]
+    
+    pp,ls = [],[]
     for k in range(len(allp)):
         p2 = allp[k]
+        #print j,k
         if p == p2: continue
-        if p in net and yr2['name'] in net[p]: continue
+        if p in net and p2 in net[p]: continue
 
-        qry2 = [y for y in players if y['name'] != p]
-        maxage2 = max([y['age'] for y in qry2]) 
+        qry2 = [y for y in players if y['name'] == p2]
+        maxage2 = max([y['age'] for y in qry2])
         qry2 = [y for y in qry2 if y['age'] == maxage2]
-        print len(qry),len(qry2)
+        #print len(qry),len(qry2)
 
-        ls = []
         #print 'len '+str(len(qry))+' '+str(maxage)
         for yr in qry:
             for yr2 in qry2:
@@ -251,10 +250,9 @@ for j in range(len(allp)):
                 pp.append(yr2['name'])
                 ls.append({'player1':p,'player2':p2,'dist':dist})
 
-        for p2 in pp:
-            add_node(net,p,p2,dist)
+    for p2 in pp: add_node(net,p,p2,dist)
 
-        if ls: distcoll.insert(ls)
+    if ls: distcoll.insert(ls)
 
 # averages = {}
 # import datetime as dt

@@ -20,7 +20,7 @@ rect.bar {
     margin-bottom:2px;
     text-align:right;
     margin-left:22em;
-    cursor:crosshair;
+    cursor:pointer;
     stroke-width:2px;
 }
 

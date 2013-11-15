@@ -181,9 +181,18 @@ function get_scale(data){
         .range([height+ymargin,ymargin])
 }
 
-function set_tooltips(){
+function set_tooltips(data){
 
     d3.selectAll(".bar")
+        .on('click',function(d){
+            type='play'
+            d3.select('#sea').attr('class','tab')
+            d3.select('#car').attr('class','tab')
+            d3.select('#play').attr('class','selected')
+            datind=0
+            player = d.name
+            draw_player(data)
+        })
         .on('mouseover',function(d,i){
             d3.select('#'+d.hsh).style('stroke','yellow')
             var g = svg.append('g')
@@ -336,7 +345,7 @@ function update_bars(data){
 
     draw_bar_x_axis()
 
-    set_tooltips()
+    set_tooltips(data)
 }
 
 function draw_leaders(data){
@@ -571,7 +580,8 @@ function draw_player(data){
         .attr('id','bchart')
         .attr('height','1000')
 
-    dd = dd.filter(function(d){return d.lname == player})
+    console.log(dd)
+    dd = dd.filter(function(d){return d.name == player})
     dd = dd.sort(dynamicSort2('year')).slice(datind,datind+nbars)
 
 
@@ -600,8 +610,12 @@ function draw_player(data){
             });
 
         draw_key_player(dd);
-
     }
+
+    svg.append('text')
+        .text(player)
+        .attr('x',xmargin+width/2.)
+        .attr('y',ymargin/2)
 
     var box = svg.append('rect')
         .attr('x',xmargin)
