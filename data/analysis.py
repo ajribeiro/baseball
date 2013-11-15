@@ -180,9 +180,9 @@ for j in range(len(allp)):
     qry = [y for y in players if y['name'] == p]
     maxage = max([y['age'] for y in qry]) 
     qry = [y for y in qry if y['age'] == maxage]
-    print qry
+    #print qry
     ls = []
-    print 'len '+str(len(qry))+' '+str(maxage)
+    #print 'len '+str(len(qry))+' '+str(maxage)
     for yr in qry:
         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
         # print 'len2 '+str(len(qry2))
