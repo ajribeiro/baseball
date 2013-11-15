@@ -178,12 +178,12 @@ for j in range(len(allp)):
     qry = [y for y in players if y['name'] == p]
     maxage = max([y['age'] for y in qry]) 
     qry = [y for y in qry if y['age'] == maxage]
-
+    print qry
     ls = []
     print 'len '+str(len(qry))+' '+str(maxage)
     for yr in qry:
         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
-        print 'len2 '+str(len(qry2))
+        # print 'len2 '+str(len(qry2))
         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
         pp = []
         for yr2 in qry2:
