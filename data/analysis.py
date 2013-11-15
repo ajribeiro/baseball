@@ -178,8 +178,9 @@ for j in range(len(allp)):
     qry = [y for y in players if y['name'] == p]
     maxage = max([y['age'] for y in qry]) 
     qry = [y for y in qry if y['age'] == maxage]
+
     ls = []
-    print 'len '+str(len(qry))
+    print 'len '+str(len(qry))+' '+str(maxage)
     for yr in qry:
         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
         print 'len2 '+str(len(qry2))
@@ -197,7 +198,6 @@ for j in range(len(allp)):
 
             dist = np.sqrt(dist)
             pp.append(yr2['name'])
-            print yr2['name']
             ls.append({'player1':p,'player2':yr2['name'],'age':yr['age'],'dist':dist})
 
         for p2 in pp:
