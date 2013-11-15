@@ -164,8 +164,53 @@ avgcoll.ensure_index('idnum')
 #avgcoll.insert(averages)
 
 
+# net = {}
+# distcoll = db.player_dists
+# distcoll.ensure_index('player1')
+# distcoll.ensure_index('player2')
+# distcoll.ensure_index('age')
+
+# dists = []
+# qry = avgcoll.find()
+# players = [y for y in qry]
+
+# for j in range(len(allp)):
+#     p = allp[j]
+#     print j
+#     qry = [y for y in players if y['name'] == p]
+#     maxage = max([y['age'] for y in qry]) 
+#     qry = [y for y in qry if y['age'] == maxage]
+#     #print qry
+#     ls = []
+#     #print 'len '+str(len(qry))+' '+str(maxage)
+#     for yr in qry:
+#         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
+#         # print 'len2 '+str(len(qry2))
+#         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
+#         pp = []
+#         for yr2 in qry2:
+#             if p in net and yr2['name'] in net[p]: continue
+#             dist = 0;
+#             for i in range(len(ratstats)):
+#                 s = ratstats[i]
+#                 if s not in yr or s not in yr2: continue
+#                 if not math.isnan(yr[s]) and not math.isnan(yr2[s]) and \
+#                         isinstance(yr[s],float) and isinstance(yr2[s],float):
+#                     dist += (abs(yr[s] - yr2[s])/abs(maxs[i]-mins[i]))**2
+
+#             dist = np.sqrt(dist)
+#             pp.append(yr2['name'])
+#             ls.append({'player1':p,'player2':yr2['name'],'age':yr['age'],'dist':dist})
+
+#         for p2 in pp:
+#             add_node(net,p,p2,dist)
+
+#     if ls: distcoll.insert(ls)
+
+
+
 net = {}
-distcoll = db.player_dists
+distcoll = db.player_dists_car
 distcoll.ensure_index('player1')
 distcoll.ensure_index('player2')
 distcoll.ensure_index('age')
@@ -184,7 +229,9 @@ for j in range(len(allp)):
     ls = []
     #print 'len '+str(len(qry))+' '+str(maxage)
     for yr in qry:
-        qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
+        qry2 = [y for y in players if y['name'] != p]
+        maxage2 = max([y['age'] for y in qry2]) 
+        qry2 = [y for y in qry2 if y['age'] == maxage2]
         # print 'len2 '+str(len(qry2))
         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
         pp = []
@@ -206,10 +253,6 @@ for j in range(len(allp)):
             add_node(net,p,p2,dist)
 
     if ls: distcoll.insert(ls)
-
-
-
-
 # averages = {}
 # import datetime as dt
 # t1 = dt.datetime.now()
