@@ -125,19 +125,20 @@ for p in qry:
         if st:
             if st > maxs[i]: maxs[i] = st
             if st < mins[i]: mins[i] = st
-    allp.append(p['name'])
+    if p not in allp: allp.append(p['name'])
+
+avgcoll = db.player_averages
 
 averages = []
 for j in range(len(allp)):
     p = allp[j]
+    averages = []
     print j
     q = collection.find({'name':p})
-    print 'count '+str(q.count())
     if q.count() < 1: continue
     q = [y for y in q]
     maxage = max([y['age'] for y in q])
     minage = min([y['age'] for y in q])
-
     for age in range(minage,maxage+1):
         qry = [y for y in q if y['age'] < age]
         avg = {'name':p,'age':age}
@@ -145,7 +146,6 @@ for j in range(len(allp)):
             s = ratstats[i]
             weights = []
             alls = []
-            n = 0
             for yr in qry:
                 avg['idnum'] = yr['idnum']
                 if yr[s]:
@@ -154,14 +154,14 @@ for j in range(len(allp)):
 
             if alls:
                 avg[ratstats[i]] = np.average(alls,weights=weights)
-
         averages.append(avg)
+    avgcoll.insert(averages)
 
-avgcoll = db.player_averages
+#avgcoll = db.player_averages
 avgcoll.ensure_index('name')
 avgcoll.ensure_index('age')
 avgcoll.ensure_index('idnum')
-avgcoll.insert(averages)
+#avgcoll.insert(averages)
 
 
 net = {}
