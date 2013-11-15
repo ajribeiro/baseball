@@ -176,12 +176,13 @@ for j in range(len(allp)):
     p = allp[j]
     print j
     qry = [y for y in players if y['name'] == p]
-    maxage = max([y['age'] for y in qry])
+    maxage = max([y['age'] for y in qry]) 
     qry = [y for y in qry if y['age'] == maxage]
     ls = []
     print 'len'+str(len(qry))
     for yr in qry:
         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
+        print 'len2'+str(len(qry2))
         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
         pp = []
         for yr2 in qry2:
@@ -201,6 +202,7 @@ for j in range(len(allp)):
 
         for p2 in pp:
             add_node(net,p,p2,dist)
+
     if ls: distcoll.insert(ls)
 
 
