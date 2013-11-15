@@ -171,15 +171,15 @@ distcoll.ensure_index('age')
 dists = []
 qry = avgcoll.find()
 players = [y for y in qry]
+
 for j in range(len(allp)):
     p = allp[j]
     print j
     qry = [y for y in players if y['name'] == p]
-    # qry = avgcoll.find({'name':p})
-    # qry = [y for y in qry]
     maxage = max([y['age'] for y in qry])
     qry = [y for y in qry if y['age'] == maxage]
     ls = []
+    print 'len'+str(len(qry))
     for yr in qry:
         qry2 = [y for y in players if y['age'] == maxage and y['name'] != p]
         # qry2 = avgcoll.find({'name':{'$ne':p},'age':yr['age']})
@@ -196,6 +196,7 @@ for j in range(len(allp)):
 
             dist = np.sqrt(dist)
             pp.append(yr2['name'])
+            print yr2['name']
             ls.append({'player1':p,'player2':yr2['name'],'age':yr['age'],'dist':dist})
 
         for p2 in pp:
