@@ -624,6 +624,26 @@ function draw_player(data){
         .attr('width',width)
         .style('fill','none')
         .style('stroke','white')
+
+    var request = {'name':player};
+    jQuery.ajax({
+        url: 'http://sd-work2.ece.vt.edu/assets/readDb.py',
+        type: 'POST',
+        cache: false,
+        data: JSON.stringify(request),
+        contentType: 'application/json',
+        processData: false,
+        success: on_request_success,
+        error: on_request_error
+    });
+}
+
+function on_request_success(response) {
+    console.debug('response', response);
+} 
+
+function on_request_error(r, text_status, error_thrown) {
+    console.debug('error', text_status + ", " + error_thrown + ":\n" + r.responseText);
 }
 
 function draw_stat(data,stat){
