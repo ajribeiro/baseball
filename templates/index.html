@@ -11,14 +11,15 @@
     
     <SCRIPT>
         var stat = 'WAR'
+        var proj = false;
         var d  = null, svg=null, svg2=null;
         var datind=0;
         var ind_leaders=1, car_leaders=0, ind=0;
         var nbars=30;
         var n_nodes = 20;
         var sdata;
-        var type='play'
-        var player = 'Barry Bonds'
+        var type='seas'
+        var player = 'Manny Ramirez'
         var pstats = ['WAR','H','HR','R','RBI','SB']
         var stats=['WAR','H','HR','R','RBI','SB','BB%','K%','ISO',
             'AVG','OBP','SLG','wOBA','wRC+']
@@ -92,9 +93,9 @@
                 <li>Search for Player:</li>
                 <li><input type='text' name='pname' id='pname'></input></li>
                 <li><input type='submit' value='Search'></input></li>
-                <li id='sea' class='tab'>Seasons</li>
+                <li id='sea' class='selected'>Seasons</li>
                 <li id='car' class='tab'>Career</li>
-                <li id='play' class='selected'>Player</li>
+                <li id='play' class='tab'>Player</li>
             </ul>
         </div>
         <div id='chart'></div>

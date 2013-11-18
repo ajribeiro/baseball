@@ -119,6 +119,7 @@ text.infotext{
 
 .tabnav {
   margin: 50px;
+  width: 950px;
   border-bottom: 2px solid white;
   height: 35px;
   text-align: right;

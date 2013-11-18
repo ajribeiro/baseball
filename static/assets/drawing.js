@@ -510,6 +510,7 @@ function draw_key_player(data){
 }
 
 function draw_key(data){
+
     var key_boxes = svg.selectAll(".key_box")
         .data(stats)
         .enter()
@@ -626,8 +627,8 @@ function draw_player(data){
             ps['result'][0]['projs'][i]['year'] = mxy+1+i
             ps['result'][0]['projs'][i]['hsh'] = player.replace(' ','')+
                                                     (mxy+1+i).toString()
-            ps['result'][0]['projs'][i]['R'] = ps['result'][0]['projs'][i]['R%']*ps['result'][0]['projs'][i]['PA']                                   
-            dd.push(ps['result'][0]['projs'][i])
+            ps['result'][0]['projs'][i]['R'] = ps['result'][0]['projs'][i]['R%']*ps['result'][0]['projs'][i]['PA']
+            if(proj) dd.push(ps['result'][0]['projs'][i])
             
         }
         dd = dd.sort(dynamicSort2('year')).slice(datind,datind+nbars)
@@ -679,7 +680,31 @@ function draw_player(data){
             .attr('y',ymargin+height/2)
             .attr('id','ytitle')
             .style('text-anchor','middle')
-            // .attr('transform','rotate(-90,'+xmargin-30+','+ymargin+height/2+')')
+
+        svg.append('rect')
+            .attr('x',xmargin+width+60)
+            .attr('y',435)
+            .style('stroke-width',2)
+            .style('stroke','white')
+            .attr('width',15)
+            .attr('height',15)
+            .style('cursor','pointer')
+            .attr('fill',function(){
+                if(proj) return 'white'
+                else return 'black'
+            })
+            .on('click',function(){
+                proj = !proj
+                draw_player(sdata)
+                return 0
+            })
+
+        svg.append('text')
+            .text('show projections')
+            .attr('x',xmargin+width+85)
+            .attr('y',448)
+
+
 
         var request = {'name':player};
         $.getJSON('/_read_db_sim', request, function(d2){
@@ -830,7 +855,10 @@ function draw_stat(data,stat){
                 .attr('y',function(){ return yy-45 })
         })
         .on('mouseout',function(d){
-            d3.select(this).attr('r',5)
+            d3.select(this).attr('r',function(d){
+                if(d.type == 'real') return 5
+                else return 8
+            })
             d3.select("#n" + d.year+''+stat.replace('+','').replace('%','')).remove();
         })
 
@@ -853,4 +881,5 @@ function draw_stat(data,stat){
         .attr('d',line(dd))
         .attr('class',stat.replace('%','').replace('+',''))
         .style('fill','none')
+
 }
