@@ -6,12 +6,41 @@ var barwid = 20;
 var mn=null,mx=null;
 var mnx, mxx;
 var dd;
+var dists;
+
+
+jQuery(document).ready(function(){
+    jQuery('#myform').submit(function(){
+        $('input[type=submit]').attr('disabled',true);
+        $.ajax({
+            url : $(this).attr('action'),
+            type: $(this).attr('method'),
+            dataType: 'json',
+            data: $(this).serialize(),
+            success: function(){ load_player() }
+        });
+        $('button[type=submit], input[type=submit]').attr('disabled',false);
+        return false;
+    });
+});
+
+function load_player(){
+    player = document.getElementById('pname').value
+    type='play'
+    d3.select('#sea').attr('class','tab')
+    d3.select('#car').attr('class','tab')
+    d3.select('#play').attr('class','selected')
+    datind=0
+    draw_player(sdata)
+}
+
 
 function draw_nav_bars(data){
 
     var off = 75
 
     var r1 = svg.append('g').attr('class','nav')
+        .style('cursor','pointer')
 
     r1.append('rect')
         .attr('x',width+xmargin+10)
@@ -42,6 +71,7 @@ function draw_nav_bars(data){
 
 
     var l1 = svg.append('g').attr('class','nav')
+        .style('cursor','pointer')
 
     l1.append('rect')
         .attr('x',width+xmargin+10)
@@ -73,6 +103,7 @@ function draw_nav_bars(data){
     })
 
     var r2 = svg.append('g').attr('class','nav')
+        .style('cursor','pointer')
 
     r2.append('rect')
         .attr('x',width+xmargin+10)
@@ -116,6 +147,7 @@ function draw_nav_bars(data){
     })
 
     var l2 = svg.append('g').attr('class','nav')
+        .style('cursor','pointer')
 
     l2.append('rect')
         .attr('x',width+xmargin+10)
@@ -216,7 +248,6 @@ function set_tooltips(data){
                         return d.name+' '+d.year+', '+stat+': '+d[stat]
                     else
                         return d.name+', '+stat+': '+d[stat]
-
                 })
                 .attr('class','infotext')
                 .attr('x',function(){
@@ -231,9 +262,6 @@ function set_tooltips(data){
             d3.select("#n" + d.name[0])
                 .remove();
         });
-        
-
-
 }
 
 function draw_bar_x_axis(){
@@ -257,7 +285,6 @@ function draw_bar_x_axis(){
         .attr('id','xtitle')
         .style('text-align','right')
         .text('Rank')
-
 }
 
 function draw_y_axis(){
@@ -281,8 +308,8 @@ function draw_y_axis(){
         .attr('id','ytitle')
         .style('text-align','right')
         .attr('transform','rotate(-90,'+xmargin-30+','+ymargin+height/2+')')
-
 }
+
 function update_bars(data){
 
     if(type == 'seas')
@@ -306,6 +333,7 @@ function update_bars(data){
             return height + ymargin- y(d[stat]);
         })
         .style('fill',function(d){
+            console.log(d.name)
             var c = intToARGB(hashCode(d.name))
             c = c.toString()
             c = c.slice(0,3)
@@ -352,13 +380,15 @@ function draw_leaders(data){
 
     d = data
 
+    d3.select('#fgraph').remove()
     d3.select('#bchart').remove()
+    
 
     svg = d3.select("#chart")
         .append("svg")
         .attr("class", "barchart")
         .attr('id','bchart')
-        .attr('height','1000')
+        .attr('height',ymargin+height+200)
 
     var dd = new Array(nbars)
     for(var i=0; i<nbars; i++) dd[i] = 0;
@@ -391,7 +421,7 @@ function draw_leaders(data){
         .attr('width',width)
         .style('fill','none')
         .style('stroke','white')
-    
+ 
 }
 
 function draw_key_player(data){
@@ -480,8 +510,6 @@ function draw_key_player(data){
 }
 
 function draw_key(data){
-// HR,R,RBI,SB,BB%,K%,ISO,BABIP,AVG,OBP,SLG,wOBA,wRC+,WAR,
-
     var key_boxes = svg.selectAll(".key_box")
         .data(stats)
         .enter()
@@ -569,82 +597,183 @@ function draw_key(data){
 }
 
 function draw_player(data){
+    console.log(player)
 
     dd = data['seasons']
 
     d3.select('#bchart').remove()
+    d3.select('#fgraph').remove()
 
     svg = d3.select("#chart")
         .append("svg")
         .attr("class", "barchart")
         .attr('id','bchart')
-        .attr('height','1000')
-
-    console.log(dd)
+        .attr('height',ymargin+height+100)
+    
     dd = dd.filter(function(d){return d.name == player})
-    dd = dd.sort(dynamicSort2('year')).slice(datind,datind+nbars)
+    console.log(dd)
 
+    for(var i=0; i<dd.length; i++)
+        dd[i]['type'] = 'real'
 
-    for(var i=0; i<pstats.length; i++){
+    var request = {'name': player}
+    $.getJSON('/_read_db_proj', request, function(ps){
+        var mxy = Math.max.apply(Math,dd.map(function(o){return o['year'];}))
+        for(var i=0; i<ps['result'][0]['projs'].length; i++){
+            console.log(ps['result'][0]['projs'][i])
+            ps['result'][0]['projs'][i]['type'] = 'proj'
+            ps['result'][0]['projs'][i]['Age'] = ps['result'][0]['projs'][i]['age']
+            ps['result'][0]['projs'][i]['year'] = mxy+1+i
+            ps['result'][0]['projs'][i]['hsh'] = player.replace(' ','')+
+                                                    (mxy+1+i).toString()
+            ps['result'][0]['projs'][i]['R'] = ps['result'][0]['projs'][i]['R%']*ps['result'][0]['projs'][i]['PA']                                   
+            dd.push(ps['result'][0]['projs'][i])
+            
+        }
+        dd = dd.sort(dynamicSort2('year')).slice(datind,datind+nbars)
 
-        draw_stat(data,pstats[i])
+        for(var i=0; i<pstats.length; i++){
 
-        var names = svg.selectAll('text.pname')
-            .data(dd)
-            .enter()
-            .append('text')
-            .attr('class','pname')
-            .transition()
-            .duration(750)
-            .attr('x',function(d){
-                return x(d['year']);
-            })
-            .attr('y',height+ymargin+5)
-            .style('stroke','white')
-            .style('fill','white')
-            .text(function(d){
-                 return d.year+', Age '+d.Age;
-            })
-            .attr("transform", function(d,i) {
+            draw_stat(data,pstats[i])
+
+            var names = svg.selectAll('text.pname')
+                .data(dd)
+                .enter()
+                .append('text')
+                .attr('class','pname')
+                .transition()
+                .duration(750)
+                .attr('x',function(d){
+                    return x(d['year']);
+                })
+                .attr('y',height+ymargin+5)
+                .style('stroke','white')
+                .style('fill','white')
+                .text(function(d){
+                     return d.year+', Age '+d.Age;
+                })
+                .attr("transform", function(d,i) {
                     return 'rotate(-90,'+x(d['year'])+','+(ymargin+height+5)+')'
+                });
+
+            draw_key_player(dd);
+        }
+
+        svg.append('text')
+            .text(player)
+            .attr('x',xmargin+width/2.)
+            .attr('y',ymargin/2)
+
+        var box = svg.append('rect')
+            .attr('x',xmargin)
+            .attr('y',ymargin)
+            .attr('height',height)
+            .attr('width',width)
+            .style('fill','none')
+            .style('stroke','white')
+
+        d3.selectAll('#ytitle').remove()
+        svg.append('text')
+            .text('Norm. Stats')
+            .attr('x',xmargin-90)
+            .attr('y',ymargin+height/2)
+            .attr('id','ytitle')
+            .style('text-anchor','middle')
+            // .attr('transform','rotate(-90,'+xmargin-30+','+ymargin+height/2+')')
+
+        var request = {'name':player};
+        $.getJSON('/_read_db_sim', request, function(d2){
+            console.log(d2)
+            if(n_nodes > d2.result.length) n_nodes = d2.result.length
+
+            dists = d2.result.slice(0,n_nodes)
+
+            nodes = [{'name':player,
+                    'color':intToARGB(hashCode(player)).toString().slice(0,3)}]
+
+            links = []
+            for(var i=0; i<n_nodes; i++){
+                nodes.push({'name':dists[i]['player2'],
+                    'color':intToARGB(hashCode(dists[i]['player2'])).toString().slice(0,3)})
+                links.push({'source':0,'target':i+1,'value':dists[i]['dist']})
+            }
+
+            console.log(nodes)
+            svg2 = d3.select('#chart')
+                .append('svg')
+                .attr('width',width+xmargin)
+                .attr('height',height*2)
+                .attr('x',xmargin)
+                .attr('y',ymargin+height*2+400)
+                .attr('id','fgraph')
+
+            svg2.append('text')
+                .attr('x',xmargin+width*.3)
+                .attr('y',ymargin*.75)
+                .style('test-anchor','middle')
+                .text('Most similar players by career stats')
+
+            var force = d3.layout.force()
+                .charge(-1200)
+                .gravity(.1)
+                .linkDistance(function(d,i){ return d.value*200 })
+                .size([width, height]);
+
+            force.nodes(nodes)
+                .links(links)
+                .start()
+
+            var link = svg2.selectAll(".link")
+                .data(links)
+                .enter()
+                .append("line")
+                .attr("class", "link");
+
+            var node = svg2.selectAll(".node")
+                .data(nodes)
+                .enter()
+                .append("circle")
+                    .style('fill',function(d){ return d['color'] })
+                    .attr("class", "node")
+                    .attr("r", function(d){
+                        if(d.name == player) return 25
+                        else return 15
+                    })
+                    .call(force.drag)
+                    .on('click',function(d){
+                        type='play'
+                        d3.select('#sea').attr('class','tab')
+                        d3.select('#car').attr('class','tab')
+                        d3.select('#play').attr('class','selected')
+                        datind=0
+                        player = d.name
+                        draw_player(data)
+                    })
+                    .style('cursor','pointer')
+            node.append("title")
+                .text(function(d,i){ 
+                    if(i == 0) return d.name
+                    else
+                        return d.name+'; dist:'+links[i-1].value.toString().slice(0,5); 
+                });
+
+            force.on("tick", function() {
+                nodes[0].x = width*.5+xmargin
+                nodes[0].y = ymargin+height*.7
+                link.attr("x1", function(d){ return d.source.x; })
+                    .attr("y1", function(d){ return d.source.y; })
+                    .attr("x2", function(d){ return d.target.x; })
+                    .attr("y2", function(d){ return d.target.y; });
+
+                node.attr("cx", function(d){ return d.x; })
+                    .attr("cy", function(d){ return d.y; });
+
+
             });
-
-        draw_key_player(dd);
-    }
-
-    svg.append('text')
-        .text(player)
-        .attr('x',xmargin+width/2.)
-        .attr('y',ymargin/2)
-
-    var box = svg.append('rect')
-        .attr('x',xmargin)
-        .attr('y',ymargin)
-        .attr('height',height)
-        .attr('width',width)
-        .style('fill','none')
-        .style('stroke','white')
-
-    var request = {'name':player};
-    jQuery.ajax({
-        url: 'http://sd-work2.ece.vt.edu/assets/readDb.py',
-        type: 'POST',
-        cache: false,
-        data: JSON.stringify(request),
-        contentType: 'application/json',
-        processData: false,
-        success: on_request_success,
-        error: on_request_error
+        });
     });
 }
 
-function on_request_success(response) {
-    console.debug('response', response);
-} 
-
-function on_request_error(r, text_status, error_thrown) {
-    console.debug('error', text_status + ", " + error_thrown + ":\n" + r.responseText);
-}
 
 function draw_stat(data,stat){
 
@@ -671,56 +800,54 @@ function draw_stat(data,stat){
         .enter()
         .append('circle')
         .attr('class',stat.replace('%','').replace('+',''))
-        .attr('cx',function(d){
-            return x(d['year'])
-        })
-        .attr('cy',function(d){
-            return y(d[stat])
-        })
+        .attr('cx',function(d){ return x(d['year']) })
+        .attr('cy',function(d){ return y(d[stat]) })
         .attr('r',1)
+        .style('cursor','crosshair')
         .on('mouseover',function(d){
             d3.select(this).attr('r',10)
-           var yy = d3.select(this).attr('cy')
+            var yy = d3.select(this).attr('cy')
             var g = svg.append('g')
-                .attr("id", 'n'+d.year+''+stat)
+                .attr("id", 'n'+d.year+''+stat.replace('+','').replace('%',''))
 
             g.append('rect')
                 .attr('class','infobox')
-                .attr("x",function(){
-                    return x(d['year'])
-                })
-                .attr("y",function() {
-                    return yy-75;
-                })
+                .attr("x",function(){ return x(d['year']) })
+                .attr("y",function() { return yy-75; })
                 .attr('width',250)
                 .attr('height',50)
                 .style('fill','black')
 
             g.append('text')
-                .text(d.year+', '+stat+': '+d[stat])
+                .text(function(){
+                    if(d.type == 'real')
+                        return d.year+', '+stat+': '+d[stat].toString().slice(0,5)
+                    else
+                        return d.year+', '+stat+': '+d[stat].toString().slice(0,5)+' (proj.)'
+                })
                 .attr('class','infotext')
-                .attr('x',function(){
-                    var xx = x(d['year'])+125
-                    return xx;
-                })
-                .attr('y',function(){
-                    return yy-45
-                })
+                .attr('x',function(){ return x(d['year'])+125; })
+                .attr('y',function(){ return yy-45 })
         })
         .on('mouseout',function(d){
             d3.select(this).attr('r',5)
-            d3.select("#n" + d.year+''+stat).remove();
+            d3.select("#n" + d.year+''+stat.replace('+','').replace('%','')).remove();
         })
 
     circs.transition()
-        .delay(function(d,i){
-            return (dd.length-i)*75;
+        .delay(function(d,i){ return (dd.length-i)*50; })
+        .attr('r',function(d){
+            if(d.type == 'real') return 5
+            else return 8
         })
-        .attr('r',5)
+        .style('fill-opacity',function(d){
+            if(d.type == 'real') return 1
+            else return .3
+        });
 
     var line = d3.svg.line()
-        .x(function(d){return x(d['year'])})
-        .y(function(d){return y(d[stat])})
+        .x(function(d){ return x(d['year']) })
+        .y(function(d){ return y(d[stat]) })
 
     g.append('path')
         .attr('d',line(dd))

@@ -228,3 +228,13 @@ path{
   fill:#66FFCC;
   stroke:#66FFCC;
 }
+
+.node{
+  stroke: white;
+  fill: white;
+}
+
+.link{
+  stroke:white;
+  fill:white;
+}
